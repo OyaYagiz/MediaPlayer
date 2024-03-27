@@ -20,7 +20,7 @@ const closeButton = document.getElementById('close-button')
 const playlistSongs = document.getElementById('playlist-songs')
 
 //şrkı sırası
-let index
+let index = 4
 
 
 //döngü durumu
@@ -41,7 +41,7 @@ const songLists =[
         Image: "Music/aram-tigran.jpg",
     },
     {
-        name: "Qumrike",
+        name: "Evin",
         link: "Music/Mem ARARAT - Evîn.mp3",
         artist: "Mem ARARAT",
         Image: "Music/Mem Ararat-evin.jpg",
@@ -57,9 +57,42 @@ const songLists =[
         link: "Music/Mem ARARAT - Xaçirek.mp3",
         artist: "Mem ARARAT",
         Image: "Music/Mem Ararat-Xaçırek.jpg",
-    },
+    }
  
 ]
+//Sesi Aç
+const playAudio =() =>{
+    audio.play()
+    pauseButton.classList.remove('hide')
+    playButton.classList.add('hide')
+}
+
+
+//ses kapatma
+const pauseAudio = () =>{
+    audio.pause()
+    pauseButton.classList.add('hide')
+    playButton.classList.remove('hide')
+}
+
+//Sarkı atamaSI
+const setSong = (arrayIndex) => {
+    let {name, link, artist, Image} = songLists[arrayIndex]
+
+    console.log(artist)
+    audio.src = link
+    songName.innerHTML =name
+    songArtist.innerHTML =artist
+    songImage.src = Image
+
+    audio.onloadedmetadata = () => {
+        maxDuration.innerText = timeFormatter(audio.duration)
+    }
+    playlistContainer.classList.add('hide')
+    //playAudio()
+
+}
+
 
 //Zaman Düzenleme
 const timeFormatter = (timeInput) =>{
@@ -71,29 +104,45 @@ const timeFormatter = (timeInput) =>{
     return `${minute}: ${second}`
 }
 
-//Sarkı atamaSI
-const setSong = (arrayIndex) => {
-    let {name, link, artist, Image} = songLists[arrayIndex]
-    audio.src = link
-    songName.innerHTML =name
-    songArtist.innerHTML =artist
-    songImage.src = Image
-
-    audio.onloadeddata = () => {
-        maxDuration.innerText = timeFormatter(audio.duration)
+//Önce ki şarkı
+const previousSong =() =>{
+    if (index>0){
+        index-=1
+    } else{
+        index = songLists.length - 1
     }
-    playlistContainer.classList.add('hide')
-    // playAudio()
-
+    setSong(index)
 }
 
-//Sesi Aç
-const playAudio =() =>{
-    audio.play()
-    pauseButton.classListremove('hide')
-    playButton.classList.add('hide')
+
+//Sonraki şarkı
+const nextSong = () =>{
+    if (loop){
+        if (index == (songLists.length - 1)){
+            index =0
+        } else{
+            index = index + 1
+        }
+        setSong(index)
+    }else{
+        let randIndex = Math.floor(Math.random() * songLists.length) 
+        setSong(randIndex)
+    }
 }
+
+
+
+
+playButton.addEventListener('click', playAudio)
+
+nextButton.addEventListener('click', nextSong)
+
+prevButton.addEventListener('click', previousSong)
+
+pauseButton.addEventListener('click',pauseAudio)
+
 window.onload =() => {
     index = 0
     setSong(index)
+    pauseAudio()
 }
