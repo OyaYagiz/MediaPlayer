@@ -5,7 +5,8 @@
 }
 
 body{
-    background: linear-gradient(to left, rgb(26, 74, 146), rgb(57, 182, 204));
+    background-color: #5a185a;
+    background-image: linear-gradient(191deg, #5a185a 0%, #221d81 100%);
     height: 100vh;
 }
 .music_player{

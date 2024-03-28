@@ -141,8 +141,64 @@ prevButton.addEventListener('click', previousSong)
 
 pauseButton.addEventListener('click',pauseAudio)
 
+progressBar.addEventListener("click", event=>{
+    let coordStart = progressBar.getBoundingClientRect().left
+
+    let coordEnd = event.clientX
+
+    let progress = (coordEnd - coordStart) / progressBar.offsetWidth
+    currentProgress.style.width = progress * 100 + "%"
+
+    audio.currentTime = progress * audio.duration
+
+    audio.play()
+    pauseButton.classList.remove('hide')
+    playButton.classList.add('hide')
+})
+
+setInterval(() => {
+    currentTimeRef.innerHTML = timeFormatter(audio.currentTime)
+    currentProgress.style.width = (audio.currentTime / audio.duration.toFixed(3))*100 + "%"
+}, 1000);
+
+audio.addEventListener('timeupdate', ()=>{
+    currentTimeRef.innerText = timeFormatter(audio.currentTime)
+})
+
+//şarkı listesini aç
+playListButton.addEventListener('click', () =>{
+    playlistContainer.classList.remove('hide')
+})
+
+//listeyi kapat
+closeButton.addEventListener('click', () => {
+    playlistContainer.classList.add('hide')
+})
+
+//şarkı listesini oluştur
+const initializePlaylist = () =>{
+    for(let i in songLists){
+        playlistSongs.innerHTML += `<li class="playlistSong"
+        onclick="setSong(${i})">
+        <div class="playlist-image-container">
+            <img src="${songLists[i].Image}"/>
+        </div>
+        <div class="playlist-song-details">
+            <span id="playlist-song-name">
+                ${songLists[i].name}
+            </span>
+            <span id="playlist-artist-name">
+                ${songLists[i].artist}
+            </span>
+        </div>
+        </li>
+        `
+    }
+}
+
 window.onload =() => {
     index = 0
     setSong(index)
     pauseAudio()
+    initializePlaylist()
 }
