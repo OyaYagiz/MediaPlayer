@@ -20,11 +20,13 @@ const closeButton = document.getElementById('close-button')
 const playlistSongs = document.getElementById('playlist-songs')
 
 //şrkı sırası
-let index = 4
+let index 
 
 
 //döngü durumu
 let loop =true
+
+let isShuffleActive = false
 
 //şarkı listesi
 const songLists =[
@@ -60,6 +62,17 @@ const songLists =[
     }
  
 ]
+
+//Zaman Düzenleme
+const timeFormatter = (timeInput) =>{
+    let minute = Math.floor(timeInput / 60)
+    minute = minute < 10 ? "0" +minute :minute
+
+    let second = Math.floor(timeInput % 60)
+    second = second < 10 ? "0" +second : second
+    return `${minute}: ${second}`
+}
+
 //Sesi Aç
 const playAudio =() =>{
     audio.play()
@@ -75,8 +88,10 @@ const pauseAudio = () =>{
     playButton.classList.remove('hide')
 }
 
+
 //Sarkı atamaSI
 const setSong = (arrayIndex) => {
+   
     let {name, link, artist, Image} = songLists[arrayIndex]
 
     console.log(artist)
@@ -89,20 +104,43 @@ const setSong = (arrayIndex) => {
         maxDuration.innerText = timeFormatter(audio.duration)
     }
     playlistContainer.classList.add('hide')
-    //playAudio()
+    playAudio()
 
 }
 
 
-//Zaman Düzenleme
-const timeFormatter = (timeInput) =>{
-    let minute = Math.floor(timeInput / 60)
-    minute = minute < 10 ? "0" +minute :minute
 
-    let second = Math.floor(timeInput % 60)
-    second = second < 10 ? "0" +second : second
-    return `${minute}: ${second}`
-}
+
+setInterval(() => {
+    currentTimeRef.innerHTML = timeFormatter(audio.currentTime)
+    currentProgress.style.width = (audio.currentTime / audio.duration.toFixed(3))*100 + "%"
+}, 1000);
+
+
+progressBar.addEventListener("click", event=>{
+    let coordStart = progressBar.getBoundingClientRect().left
+    console.log(coordStart)
+
+    let coordEnd = event.clientX
+    console.log(coordEnd)
+    console.log(progressBar.offsetWidth)
+
+    let progress = (coordEnd - coordStart) / progressBar.offsetWidth
+    console.log(progress)
+
+    currentProgress.style.width = progress * 100 + "%"
+
+    audio.currentTime = progress * audio.duration
+
+    audio.play()
+    pauseButton.classList.remove('hide')
+    playButton.classList.add('hide')
+})
+
+
+
+
+
 
 //Önce ki şarkı
 const previousSong =() =>{
@@ -113,7 +151,6 @@ const previousSong =() =>{
     }
     setSong(index)
 }
-
 
 //Sonraki şarkı
 const nextSong = () =>{
@@ -131,38 +168,43 @@ const nextSong = () =>{
 }
 
 
+//tekrar etme
+repeatButton.addEventListener('click', ()=>{
+    if (repeatButton.classList.contains('active')){
+        repeatButton.classList.remove('active')
+        audio.loop = false
+        
+    } else{
+        repeatButton.classList.add('active')
+        audio.loop = true
+        
 
-
-playButton.addEventListener('click', playAudio)
-
-nextButton.addEventListener('click', nextSong)
-
-prevButton.addEventListener('click', previousSong)
-
-pauseButton.addEventListener('click',pauseAudio)
-
-progressBar.addEventListener("click", event=>{
-    let coordStart = progressBar.getBoundingClientRect().left
-
-    let coordEnd = event.clientX
-
-    let progress = (coordEnd - coordStart) / progressBar.offsetWidth
-    currentProgress.style.width = progress * 100 + "%"
-
-    audio.currentTime = progress * audio.duration
-
-    audio.play()
-    pauseButton.classList.remove('hide')
-    playButton.classList.add('hide')
+    }
 })
 
-setInterval(() => {
-    currentTimeRef.innerHTML = timeFormatter(audio.currentTime)
-    currentProgress.style.width = (audio.currentTime / audio.duration.toFixed(3))*100 + "%"
-}, 1000);
+
+//karıştırma
+shuffleButton.addEventListener('click', ()=>{
+    if (shuffleButton.classList.contains('active')) {
+        shuffleButton.classList.remove('active')
+        audio.loop = true
+    }else{
+        shuffleButton.classList.add('active')
+        audio.loop = false
+    }
+
+})
+
+
+//şarkı bittiğinde
+audio.onended = () =>{
+    nextSong()
+}
+
 
 audio.addEventListener('timeupdate', ()=>{
     currentTimeRef.innerText = timeFormatter(audio.currentTime)
+
 })
 
 //şarkı listesini aç
@@ -174,6 +216,18 @@ playListButton.addEventListener('click', () =>{
 closeButton.addEventListener('click', () => {
     playlistContainer.classList.add('hide')
 })
+
+
+
+
+playButton.addEventListener('click', playAudio)
+
+nextButton.addEventListener('click', nextSong)
+
+prevButton.addEventListener('click', previousSong)
+
+pauseButton.addEventListener('click',pauseAudio)
+
 
 //şarkı listesini oluştur
 const initializePlaylist = () =>{
